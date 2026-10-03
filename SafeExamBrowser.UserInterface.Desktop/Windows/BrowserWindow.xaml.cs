@@ -33,7 +33,6 @@ using SafeExamBrowser.UserInterface.Shared.Utilities;
 using System.Text;
 using System.Net.Http;
 using System.Web.Script.Serialization;
-using System.IO;
 
 namespace SafeExamBrowser.UserInterface.Desktop.Windows
 {
@@ -54,10 +53,7 @@ namespace SafeExamBrowser.UserInterface.Desktop.Windows
 		private Window aiChatPopup;
 		private TextBox aiQuestionBox;
 		private TextBox aiAnswerBox;
-		private Image aiScreenImage;
 		private Button aiSendButton;
-		private Button aiScreenButton;
-		private Button aiChatButton;
 
 		private WindowClosedEventHandler closed;
 		private WindowClosingEventHandler closing;
@@ -1125,7 +1121,6 @@ if (typeof __SEB_focusElement === 'undefined') {
 
 				var layout = new Grid();
 				layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-				layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 				layout.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 				layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
@@ -1135,77 +1130,19 @@ if (typeof __SEB_focusElement === 'undefined') {
 
 				var titleStack = new StackPanel();
 				titleStack.Children.Add(new TextBlock
-				{
-					Text = "AI Assistant",
-					Foreground = Brushes.Black,
-					FontSize = 19,
-					FontWeight = FontWeights.SemiBold
-				});
+				{ Text = "AI Assistant", Foreground = Brushes.Black, FontSize = 19, FontWeight = FontWeights.SemiBold });
 				titleStack.Children.Add(new TextBlock
-				{
-					Text = "Chat + local screen preview",
-					Foreground = new SolidColorBrush(Color.FromRgb(110, 110, 110)),
-					FontSize = 11,
-					Margin = new Thickness(0, 3, 0, 0)
-				});
+				{ Text = "Chat Assistant", Foreground = new SolidColorBrush(Color.FromRgb(110, 110, 110)), FontSize = 11, Margin = new Thickness(0, 3, 0, 0) });
 				Grid.SetColumn(titleStack, 0);
 				header.Children.Add(titleStack);
 
 				var closeButton = new Button
-				{
-					Content = "×",
-					Width = 32,
-					Height = 32,
-					FontSize = 20,
-					Foreground = Brushes.Black,
-					Background = new SolidColorBrush(Color.FromArgb(145, 245, 245, 245)),
-					BorderThickness = new Thickness(0)
-				};
+				{ Content = "×", Width = 32, Height = 32, FontSize = 20, Foreground = Brushes.Black, Background = new SolidColorBrush(Color.FromArgb(145, 245, 245, 245)), BorderThickness = new Thickness(0) };
 				closeButton.Click += (o, args) => aiChatPopup.Hide();
 				Grid.SetColumn(closeButton, 1);
 				header.Children.Add(closeButton);
 				Grid.SetRow(header, 0);
 				layout.Children.Add(header);
-
-				var modeGrid = new Grid { Margin = new Thickness(0, 0, 0, 12) };
-				modeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-				modeGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-				aiChatButton = new Button
-				{
-					Content = "Chat",
-					Height = 38,
-					Margin = new Thickness(0, 0, 5, 0),
-					Foreground = Brushes.Black,
-					Background = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
-					BorderThickness = new Thickness(0)
-				};
-
-				aiScreenButton = new Button
-				{
-					Content = "Screen Preview",
-					Height = 38,
-					Margin = new Thickness(5, 0, 0, 0),
-					Foreground = Brushes.Black,
-					Background = new SolidColorBrush(Color.FromArgb(145, 245, 245, 245)),
-					BorderThickness = new Thickness(0)
-				};
-
-				aiChatButton.Click += (o, args) =>
-				{
-					aiChatButton.Background = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255));
-					aiScreenButton.Background = new SolidColorBrush(Color.FromArgb(145, 245, 245, 245));
-					FocusAIQuestionBox();
-				};
-
-				aiScreenButton.Click += async (o, args) => await AnalyzeScreen();
-
-				Grid.SetColumn(aiChatButton, 0);
-				Grid.SetColumn(aiScreenButton, 1);
-				modeGrid.Children.Add(aiChatButton);
-				modeGrid.Children.Add(aiScreenButton);
-				Grid.SetRow(modeGrid, 1);
-				layout.Children.Add(modeGrid);
 
 				var answerBorder = new Border
 				{
@@ -1215,16 +1152,6 @@ if (typeof __SEB_focusElement === 'undefined') {
 					CornerRadius = new CornerRadius(12),
 					Padding = new Thickness(12),
 					Margin = new Thickness(0, 0, 0, 12)
-				};
-
-				var answerGrid = new Grid();
-
-				aiScreenImage = new Image
-				{
-					Stretch = Stretch.Uniform,
-					Visibility = Visibility.Collapsed,
-					HorizontalAlignment = HorizontalAlignment.Center,
-					VerticalAlignment = VerticalAlignment.Center
 				};
 
 				aiAnswerBox = new TextBox
@@ -1242,12 +1169,8 @@ if (typeof __SEB_focusElement === 'undefined') {
 					FontSize = 14,
 					Text = "Ask a question to start."
 				};
-
-				answerGrid.Children.Add(aiScreenImage);
-				answerGrid.Children.Add(aiAnswerBox);
-
-				answerBorder.Child = answerGrid;
-				Grid.SetRow(answerBorder, 2);
+				answerBorder.Child = aiAnswerBox;
+				Grid.SetRow(answerBorder, 1);
 				layout.Children.Add(answerBorder);
 
 				var inputGrid = new Grid();
@@ -1270,43 +1193,20 @@ if (typeof __SEB_focusElement === 'undefined') {
 				inputGrid.Children.Add(aiQuestionBox);
 
 				aiSendButton = new Button
-				{
-					Content = "Send",
-					Width = 72,
-					Height = 44,
-					Margin = new Thickness(8, 0, 0, 0),
-					Foreground = Brushes.Black,
-					Background = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)),
-					BorderThickness = new Thickness(0)
-				};
+				{ Content = "Send", Width = 72, Height = 44, Margin = new Thickness(8, 0, 0, 0), Foreground = Brushes.Black, Background = new SolidColorBrush(Color.FromArgb(200, 255, 255, 255)), BorderThickness = new Thickness(0) };
 				aiSendButton.Click += AISendButton_Click;
 				Grid.SetColumn(aiSendButton, 1);
 				inputGrid.Children.Add(aiSendButton);
-				Grid.SetRow(inputGrid, 3);
+				Grid.SetRow(inputGrid, 2);
 				layout.Children.Add(inputGrid);
 
 				panel.Child = layout;
-
 				aiChatPopup = new Window
-				{
-					Content = panel,
-					Width = 420,
-					Height = 560,
-					WindowStyle = WindowStyle.None,
-					ResizeMode = ResizeMode.NoResize,
-					AllowsTransparency = true,
-					Background = Brushes.Transparent,
-					ShowInTaskbar = false,
-					Topmost = true,
-					ShowActivated = true,
-					Owner = this
-				};
+				{ Content = panel, Width = 420, Height = 560, WindowStyle = WindowStyle.None, ResizeMode = ResizeMode.NoResize, AllowsTransparency = true, Background = Brushes.Transparent, ShowInTaskbar = false, Topmost = true, ShowActivated = true, Owner = this };
 			}
 
 			if (aiChatPopup.Visibility == Visibility.Visible)
-			{
 				aiChatPopup.Hide();
-			}
 			else
 			{
 				PositionAIAssistantWindow();
@@ -1369,8 +1269,6 @@ if (typeof __SEB_focusElement === 'undefined') {
 
 			aiSendButton.IsEnabled = false;
 			aiQuestionBox.IsEnabled = false;
-			aiScreenButton.IsEnabled = false;
-			aiChatButton.IsEnabled = false;
 			aiAnswerBox.Text = "Thinking...";
 
 			try
@@ -1424,159 +1322,11 @@ if (typeof __SEB_focusElement === 'undefined') {
 			{
 				aiSendButton.IsEnabled = true;
 				aiQuestionBox.IsEnabled = true;
-				aiScreenButton.IsEnabled = true;
-				aiChatButton.IsEnabled = true;
 				FocusAIQuestionBox();
 			}
 		}
 
-		private async Task AnalyzeScreen()
-		{
-			aiScreenButton.IsEnabled = false;
-			aiChatButton.IsEnabled = false;
-			aiQuestionBox.IsEnabled = false;
-			aiSendButton.IsEnabled = false;
 
-			aiScreenImage.Visibility = Visibility.Collapsed;
-			aiAnswerBox.Visibility = Visibility.Visible;
-			aiAnswerBox.Text = "Capturing the SEB window...";
-
-			var wasPopupVisible = aiChatPopup != null && aiChatPopup.IsVisible;
-
-			try
-			{
-				// IMPORTANT: obtain the WPF window handle on the UI thread.
-				// Do not access WindowInteropHelper/this from inside Task.Run().
-				var windowHandle = new WindowInteropHelper(this).Handle;
-
-				if (windowHandle == IntPtr.Zero)
-				{
-					throw new InvalidOperationException(
-						"The SEB window handle is not ready.");
-				}
-
-				// Hide the AI popup temporarily so it cannot appear in the SEB screenshot.
-				if (wasPopupVisible)
-				{
-					aiChatPopup.Hide();
-				}
-
-				// Give Windows a moment to repaint after hiding the popup.
-				await Task.Delay(150);
-
-				// The background operation receives only the native HWND.
-				// It does not touch any WPF object owned by the UI thread.
-				var filePath = await Task.Run(
-					() => CapturePrimaryScreenToFile(windowHandle));
-
-				var bitmap = new BitmapImage();
-
-				bitmap.BeginInit();
-				bitmap.UriSource = new Uri(filePath, UriKind.Absolute);
-				bitmap.CacheOption = BitmapCacheOption.OnLoad;
-				bitmap.EndInit();
-				bitmap.Freeze();
-
-				aiScreenImage.Source = bitmap;
-				aiAnswerBox.Visibility = Visibility.Collapsed;
-				aiScreenImage.Visibility = Visibility.Visible;
-			}
-			catch (Exception ex)
-			{
-				logger.Error("Failed to capture the SEB window locally.", ex);
-
-				aiScreenImage.Visibility = Visibility.Collapsed;
-				aiAnswerBox.Visibility = Visibility.Visible;
-				aiAnswerBox.Text =
-					"Local SEB screen capture failed.\n\n" +
-					ex.Message;
-			}
-			finally
-			{
-				if (wasPopupVisible && aiChatPopup != null)
-				{
-					PositionAIAssistantWindow();
-					aiChatPopup.Show();
-					aiChatPopup.Activate();
-				}
-
-				aiScreenButton.IsEnabled = true;
-				aiChatButton.IsEnabled = true;
-				aiQuestionBox.IsEnabled = true;
-				aiSendButton.IsEnabled = true;
-			}
-		}
-
-		[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-		private struct NativeRect
-		{
-			public int Left;
-			public int Top;
-			public int Right;
-			public int Bottom;
-		}
-
-		[System.Runtime.InteropServices.DllImport("user32.dll")]
-		private static extern bool GetWindowRect(
-			IntPtr hWnd,
-			out NativeRect lpRect);
-
-		private string CapturePrimaryScreenToFile(IntPtr windowHandle)
-		{
-			// This method may run on a background thread.
-			// It must use only the native HWND and GDI APIs here.
-			if (windowHandle == IntPtr.Zero)
-			{
-				throw new InvalidOperationException("The SEB window handle is not ready.");
-			}
-
-			NativeRect rect;
-
-			if (!GetWindowRect(windowHandle, out rect))
-			{
-				throw new InvalidOperationException("Could not determine the SEB window bounds.");
-			}
-
-			var width = rect.Right - rect.Left;
-			var height = rect.Bottom - rect.Top;
-
-			if (width <= 0 || height <= 0)
-			{
-				throw new InvalidOperationException("The SEB window has an invalid size.");
-			}
-
-			var directory = Path.Combine(
-				Path.GetTempPath(),
-				"SEB-AI-Assistant");
-			Directory.CreateDirectory(directory);
-
-			var filePath = Path.Combine(
-				directory,
-				"seb-screen-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".jpg");
-
-			using (var bitmap = new System.Drawing.Bitmap(
-				width,
-				height,
-				System.Drawing.Imaging.PixelFormat.Format24bppRgb))
-			{
-				using (var graphics = System.Drawing.Graphics.FromImage(bitmap))
-				{
-					graphics.CopyFromScreen(
-						rect.Left,
-						rect.Top,
-						0,
-						0,
-						bitmap.Size,
-						System.Drawing.CopyPixelOperation.SourceCopy);
-				}
-
-				bitmap.Save(
-					filePath,
-					System.Drawing.Imaging.ImageFormat.Jpeg);
-			}
-
-			return filePath;
-		}
 	}
 
 }

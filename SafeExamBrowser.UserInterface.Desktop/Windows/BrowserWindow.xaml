@@ -282,7 +282,7 @@
         <WindowsFormsHost Grid.Row="1"
                           x:Name="BrowserControlHost" />
 
-        <!-- AI Assistant -->
+        <!-- AI Assistant TEST -->
         <Popup x:Name="AIAssistantPopup"
        AllowsTransparency="True"
        StaysOpen="True"
@@ -290,13 +290,13 @@
        PlacementTarget="{Binding ElementName=BrowserControlHost}">
 
             <Button x:Name="AIAssistantButton"
-            Width="56"
-            Height="56"
-            Background="#202020"
+            Width="50"
+            Height="40"
+            Content="AI"
+            Background="White"
             Foreground="White"
-            FontSize="24"
-            Content="🤖"
-            ToolTip="AI Assistant"
+            BorderBrush="White"
+            BorderThickness="1"
             Click="AIAssistantButton_Click" />
 
         </Popup>
