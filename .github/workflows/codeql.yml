@@ -2,17 +2,18 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "master", "*" ]
+    branches: ["master", "*"]
   pull_request:
-    branches: [ "master", "*" ]
+    branches: ["master", "*"]
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: "0 0 * * 1"
 
 jobs:
   analyze:
     name: Analyze
-    runs-on: "windows-latest"
+    runs-on: windows-latest
     timeout-minutes: 360
+
     permissions:
       actions: read
       contents: read
@@ -21,22 +22,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'csharp', 'javascript-typescript' ]
+        include:
+          - language: csharp
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
-      with:
-        languages: ${{ matrix.language }}
-        queries: security-extended,security-and-quality
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v4
+      - name: Set up MSBuild
+        if: matrix.language == 'csharp'
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
-      with:
-        category: "/language:${{matrix.language}}"
+      - name: Build Safe Exam Browser
+        if: matrix.language == 'csharp'
+        shell: powershell
+        run: |
+          msbuild ".\SafeExamBrowser.sln" `
+            /m `
+            /p:Configuration=Debug `
+            /p:Platform=x86 `
+            /p:SkipInvalidConfigurations=true
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
