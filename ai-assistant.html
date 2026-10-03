@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+				<title>CSE AIML AI Assistant</title>
+
+				<style>
+
+					* {
+					box-sizing: border-box;
+					}
+
+					body {
+					margin: 0;
+					padding: 0;
+					font-family: Arial, sans-serif;
+					background: transparent;
+					}
+
+					/* =========================
+					FLOATING BUTTON
+					========================= */
+
+					#assistantButton {
+					position: fixed;
+					right: 25px;
+					bottom: 25px;
+
+					width: 62px;
+					height: 62px;
+
+					border-radius: 50%;
+
+					border: 1px solid rgba(255,255,255,0.35);
+
+					background: rgba(20,20,25,0.72);
+
+					backdrop-filter: blur(18px);
+
+					color: white;
+
+					font-size: 27px;
+
+					cursor: pointer;
+
+					box-shadow:
+					0 10px 35px rgba(0,0,0,0.35);
+
+					z-index: 9999;
+
+					transition: 0.25s;
+					}
+
+					#assistantButton:hover {
+					transform: scale(1.08);
+					}
+
+
+					/* =========================
+					PANEL
+					========================= */
+
+					#assistantPanel {
+
+					position: fixed;
+
+					right: 25px;
+					bottom: 98px;
+
+					width: 360px;
+
+					background: rgba(20,20,25,0.82);
+
+					backdrop-filter: blur(25px);
+
+					border:
+					1px solid rgba(255,255,255,0.18);
+
+					border-radius: 22px;
+
+					padding: 16px;
+
+					color: white;
+
+					box-shadow:
+					0 20px 60px rgba(0,0,0,0.45);
+
+					display: none;
+
+					z-index: 9998;
+
+					animation: panelOpen 0.2s ease;
+					}
+
+					@keyframes panelOpen {
+
+					from {
+					opacity: 0;
+					transform: translateY(12px) scale(0.96);
+					}
+
+					to {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+					}
+
+					}
+
+
+					/* =========================
+					HEADER
+					========================= */
+
+					.header {
+
+					display: flex;
+
+					justify-content: space-between;
+
+					align-items: center;
+
+					margin-bottom: 12px;
+					}
+
+					.title {
+
+					font-size: 17px;
+
+					font-weight: 600;
+					}
+
+					#screenStatus {
+
+					font-size: 11px;
+
+					padding: 5px 8px;
+
+					border-radius: 20px;
+
+					background: rgba(255,255,255,0.08);
+
+					color: #aaa;
+					}
+
+					#screenStatus.active {
+
+					color: #7cff9b;
+
+					background:
+					rgba(60,255,120,0.12);
+					}
+
+
+					/* =========================
+					MODE BUTTONS
+					========================= */
+
+					.modeButtons {
+
+					display: flex;
+
+					gap: 8px;
+
+					margin-bottom: 12px;
+					}
+
+					.modeButtons button {
+
+					flex: 1;
+
+					border: 1px solid rgba(255,255,255,0.15);
+
+					background: rgba(255,255,255,0.06);
+
+					color: #ddd;
+
+					border-radius: 12px;
+
+					padding: 10px;
+
+					cursor: pointer;
+
+					transition: 0.2s;
+					}
+
+					.modeButtons button:hover {
+
+					background:
+					rgba(255,255,255,0.12);
+					}
+
+					.modeButtons button.active {
+
+					background:
+					rgba(100,140,255,0.22);
+
+					border-color:
+					rgba(120,150,255,0.45);
+
+					color: white;
+					}
+
+
+					/* =========================
+					QUESTION AREA
+					========================= */
+
+					#question {
+
+					width: 100%;
+
+					min-height: 70px;
+
+					resize: none;
+
+					padding: 12px;
+
+					border-radius: 14px;
+
+					border:
+					1px solid rgba(255,255,255,0.12);
+
+					outline: none;
+
+					background:
+					rgba(255,255,255,0.06);
+
+					color: white;
+
+					font-size: 14px;
+					}
+
+					#question::placeholder {
+
+					color: #888;
+					}
+
+
+					/* =========================
+					SEND
+					========================= */
+
+					.sendRow {
+
+					display: flex;
+
+					gap: 8px;
+
+					margin-top: 8px;
+					}
+
+					#sendButton {
+
+					flex: 1;
+
+					border: none;
+
+					border-radius: 12px;
+
+					padding: 11px;
+
+					background:
+					rgba(100,140,255,0.35);
+
+					color: white;
+
+					cursor: pointer;
+
+					font-size: 14px;
+					}
+
+					#sendButton:hover {
+
+					background:
+					rgba(100,140,255,0.5);
+					}
+
+
+					/* =========================
+					ANSWER
+					========================= */
+
+					#answer {
+
+					margin-top: 12px;
+
+					min-height: 50px;
+
+					max-height: 220px;
+
+					overflow-y: auto;
+
+					padding: 12px;
+
+					border-radius: 14px;
+
+					background:
+					rgba(255,255,255,0.05);
+
+					border:
+					1px solid rgba(255,255,255,0.08);
+
+					color: #e8e8e8;
+
+					font-size: 13px;
+
+					line-height: 1.5;
+
+					white-space: pre-wrap;
+					}
+
+
+					/* =========================
+					MOBILE
+					========================= */
+
+					@media(max-width:500px) {
+
+					#assistantPanel {
+
+					right: 12px;
+
+					left: 12px;
+
+					width: auto;
+
+					bottom: 90px;
+					}
+
+					#assistantButton {
+
+					right: 18px;
+
+					bottom: 18px;
+					}
+					}
+
+				</style>
+			</head>
+
+
+	<body>
+
+
+		<!-- FLOATING BUTTON -->
+
+		<button
+			id="assistantButton"
+			onclick="toggleAssistant()">
+
+			🤖
+
+		</button>
+
+
+		<!-- ASSISTANT PANEL -->
+
+		<div id="assistantPanel">
+
+			<div class="header">
+
+				<div class="title">
+					CSE • AIML Assistant
+				</div>
+
+				<div id="screenStatus">
+					No screen
+				</div>
+
+			</div>
+
+
+			<!-- MODE BUTTONS -->
+
+			<div class="modeButtons">
+
+				<button
+					id="screenButton"
+					onclick="screenAnalyzer()">
+
+					🖥 Screen
+
+				</button>
+
+				<button
+					id="chatButton"
+					class="active"
+					onclick="enableChat()">
+
+					💬 Chat
+
+				</button>
+
+			</div>
+
+
+			<!-- QUESTION -->
+
+			<textarea
+				id="question"
+				placeholder="Ask a CSE or AIML question..."
+        ></textarea>
+
+
+			<!-- SEND -->
+
+			<div class="sendRow">
+
+				<button
+					id="sendButton"
+					onclick="sendQuestion()">
+
+					➤ Send
+
+				</button>
+
+			</div>
+
+
+			<!-- ANSWER -->
+
+			<div id="answer">
+
+				Ask me anything about CSE or AIML.
+
+			</div>
+
+		</div>
+
+
+		<script>
+
+
+			/* =====================================================
+			VARIABLES
+			===================================================== */
+
+			let assistantOpen = false;
+
+			let currentMode = "chat";
+
+			/*
+			This stores the latest captured screen.
+
+			It stays available while this page is open.
+			*/
+
+			let capturedScreen = null;
+
+
+			/* =====================================================
+			OPEN / CLOSE ASSISTANT
+			===================================================== */
+
+			function toggleAssistant() {
+
+			assistantOpen = !assistantOpen;
+
+			const panel =
+			document.getElementById("assistantPanel");
+
+			panel.style.display =
+			assistantOpen ? "block" : "none";
+			}
+
+
+			/* =====================================================
+			CHAT MODE
+			===================================================== */
+
+			function enableChat() {
+
+			currentMode = "chat";
+
+			document
+			.getElementById("chatButton")
+			.classList.add("active");
+
+			document
+			.getElementById("screenButton")
+			.classList.remove("active");
+
+			document
+			.getElementById("question")
+			.placeholder =
+			capturedScreen
+			? "Ask something about the captured screen..."
+			: "Ask a CSE or AIML question...";
+			}
+
+
+			/* =====================================================
+			SCREEN ANALYZER
+			===================================================== */
+
+			async function screenAnalyzer() {
+
+			currentMode = "screen";
+
+			document
+			.getElementById("screenButton")
+			.classList.add("active");
+
+			document
+			.getElementById("chatButton")
+			.classList.remove("active");
+
+			document
+			.getElementById("question")
+			.placeholder =
+			"Capture a screen, then ask a question...";
+
+
+			try {
+
+			showAnswer(
+			"Select the screen or window you want me to analyze."
+			);
+
+
+			/*
+			Browser asks for explicit permission.
+			*/
+
+			const stream =
+			await navigator.mediaDevices.getDisplayMedia({
+
+			video: true,
+
+			audio: false
+
+			});
+
+
+			showAnswer(
+			"Capturing screen..."
+			);
+
+
+			/*
+			Create hidden video element.
+			*/
+
+			const video =
+			document.createElement("video");
+
+			video.srcObject = stream;
+
+			video.muted = true;
+
+			await video.play();
+
+
+			/*
+			Wait for frame.
+			*/
+
+			await new Promise(resolve => {
+
+			setTimeout(resolve, 500);
+
+			});
+
+
+			/*
+			Limit image width.
+
+			This keeps the request smaller
+			and faster.
+			*/
+
+			const maxWidth = 1280;
+
+			const scale =
+			Math.min(
+			1,
+			maxWidth / video.videoWidth
+			);
+
+
+			const canvas =
+			document.createElement("canvas");
+
+
+			canvas.width =
+			Math.floor(
+			video.videoWidth * scale
+			);
+
+			canvas.height =
+			Math.floor(
+			video.videoHeight * scale
+			);
+
+
+			const ctx =
+			canvas.getContext("2d");
+
+
+			ctx.drawImage(
+
+			video,
+
+			0,
+			0,
+
+			canvas.width,
+			canvas.height
+
+			);
+
+
+			/*
+			Convert screenshot to JPEG.
+			*/
+
+			capturedScreen =
+			canvas.toDataURL(
+			"image/jpeg",
+			0.70
+			);
+
+
+			/*
+			IMPORTANT:
+			Stop screen capture immediately.
+
+			We capture only one frame.
+			*/
+
+			stream
+			.getTracks()
+			.forEach(track => track.stop());
+
+
+			/*
+			Update status.
+			*/
+
+			const status =
+			document.getElementById(
+			"screenStatus"
+			);
+
+			status.textContent =
+			"Screen captured ✓";
+
+			status.classList.add("active");
+
+
+			showAnswer(
+			"Screen captured successfully.\n\n" +
+			"Now type your question and press Send."
+			);
+
+
+			} catch (error) {
+
+			console.error(error);
+
+			showAnswer(
+			"Screen capture was cancelled or unavailable."
+			);
+
+			}
+
+			}
+
+
+			/* =====================================================
+			SEND QUESTION
+			===================================================== */
+
+			async function sendQuestion() {
+
+			const question =
+			document
+			.getElementById("question")
+			.value
+			.trim();
+
+
+			if (!question) {
+
+			showAnswer(
+			"Please enter a question."
+			);
+
+			return;
+			}
+
+
+			showAnswer(
+			"Thinking..."
+			);
+
+
+			try {
+
+
+			/*
+			============================================
+			CASE 1:
+			SCREEN IS AVAILABLE
+			============================================
+			*/
+
+			if (capturedScreen) {
+
+			const response =
+			await fetch(
+			"http://localhost:3000/analyze-screen",
+			{
+
+			method: "POST",
+
+			headers: {
+
+			"Content-Type":
+			"application/json"
+
+			},
+
+			body: JSON.stringify({
+
+			question:
+			question,
+
+			image:
+			capturedScreen
+
+			})
+
+			}
+			);
+
+
+			const data =
+			await response.json();
+
+
+			if (!response.ok) {
+
+			throw new Error(
+			data.answer ||
+			"Screen analysis failed."
+			);
+			}
+
+
+			showAnswer(
+			data.answer
+			);
+
+
+			return;
+			}
+
+
+			/*
+			============================================
+			CASE 2:
+			NORMAL CHAT
+			============================================
+			*/
+
+			const response =
+			await fetch(
+			"http://localhost:3000/ask",
+			{
+
+			method: "POST",
+
+			headers: {
+
+			"Content-Type":
+			"application/json"
+
+			},
+
+			body: JSON.stringify({
+
+			question:
+			question
+
+			})
+
+			}
+			);
+
+
+			const data =
+			await response.json();
+
+
+			if (!response.ok) {
+
+			throw new Error(
+			data.answer ||
+			"Chat request failed."
+			);
+			}
+
+
+			showAnswer(
+			data.answer
+			);
+
+
+			} catch (error) {
+
+			console.error(error);
+
+			showAnswer(
+			"Something went wrong. Please check that the AI backend is running."
+			);
+
+			}
+
+			}
+
+
+			/* =====================================================
+			DISPLAY ANSWER
+			===================================================== */
+
+			function showAnswer(text) {
+
+			document
+			.getElementById("answer")
+			.textContent = text;
+			}
+
+
+			/* =====================================================
+			ENTER KEY
+			===================================================== */
+
+			document
+			.getElementById("question")
+			.addEventListener(
+			"keydown",
+			function(event) {
+
+			/*
+			Enter = send
+
+			Shift + Enter = new line
+			*/
+
+			if (
+			event.key === "Enter" &&
+			!event.shiftKey
+			) {
+
+			event.preventDefault();
+
+			sendQuestion();
+
+			}
+
+			}
+			);
+
+
+		</script>
+
+	</body>
+</html>
